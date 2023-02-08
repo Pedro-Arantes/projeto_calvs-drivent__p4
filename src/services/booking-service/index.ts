@@ -13,21 +13,7 @@ async function getBookingService(userId: number) {
   return booking;
 }
 async function postBookingService(userId: number, roomId: number) {
-  const enroll = await enrollmentRepository.findByUserId(userId);
-  if (!enroll) {
-    throw notFoundError();
-  }
-  const ticket = await ticketRepository.findTicketByEnrollmentId(enroll.id);
-  if (!ticket || ticket.status === "RESERVED" || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
-    throw forbiddenError();
-  }
-  const room = await roomRepository.findRoomById(roomId);
-  if (!room) {
-    throw notFoundError();
-  }
-  if (room.capacity === room.Booking.length) {
-    throw forbiddenError();
-  }
+  await Validation(userId, roomId);
   const result = await bookingRepository.createBooking(userId, roomId);
   return result;
 }
@@ -36,12 +22,21 @@ async function putBookingService(userId: number, roomId: number, bookingId: numb
   if (!booking) {
     throw forbiddenError();
   }
+  await Validation(userId, roomId);
+  const result = await bookingRepository.updateBooking(userId, roomId, bookingId);
+  return result;
+}
+
+const Validation = async (userId: number, roomId: number) => {
   const enroll = await enrollmentRepository.findByUserId(userId);
   if (!enroll) {
     throw notFoundError();
   }
   const ticket = await ticketRepository.findTicketByEnrollmentId(enroll.id);
-  if (!ticket || ticket.status === "RESERVED" || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
+  if (!ticket) {
+    throw forbiddenError();
+  }
+  if (ticket.status === "RESERVED" || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
     throw forbiddenError();
   }
   const room = await roomRepository.findRoomById(roomId);
@@ -51,9 +46,7 @@ async function putBookingService(userId: number, roomId: number, bookingId: numb
   if (room.capacity === room.Booking.length) {
     throw forbiddenError();
   }
-  const result = await bookingRepository.updateBooking(userId, roomId, bookingId);
-  return result;
-}
+};
 
 const bookingService = {
   getBookingService,

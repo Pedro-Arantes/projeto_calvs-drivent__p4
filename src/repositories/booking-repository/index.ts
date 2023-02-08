@@ -5,6 +5,9 @@ async function findBookingById(userId: number) {
     where: {
       userId,
     },
+    include: {
+      Room: true,
+    },
   });
 }
 

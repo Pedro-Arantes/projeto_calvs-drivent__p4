@@ -7,7 +7,7 @@ const bookingRouter = Router();
 bookingRouter
   .all("/*", authenticateToken)
   .put("/:bookingId", putBooking)
-  .get("", getBooking)
-  .post("", postBooking);
+  .get("/", getBooking)
+  .post("/", postBooking);
 
 export { bookingRouter };
