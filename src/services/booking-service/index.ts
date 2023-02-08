@@ -29,21 +29,22 @@ async function putBookingService(userId: number, roomId: number, bookingId: numb
 
 const Validation = async (userId: number, roomId: number) => {
   const enroll = await enrollmentRepository.findByUserId(userId);
+  const room = await roomRepository.findRoomById(roomId);
+  if (!room) {
+    throw notFoundError();
+  }
   if (!enroll) {
     throw notFoundError();
   }
+  if (room.capacity === room.Booking.length) {
+    throw forbiddenError();
+  }
+
   const ticket = await ticketRepository.findTicketByEnrollmentId(enroll.id);
   if (!ticket) {
     throw forbiddenError();
   }
   if (ticket.status === "RESERVED" || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
-    throw forbiddenError();
-  }
-  const room = await roomRepository.findRoomById(roomId);
-  if (!room) {
-    throw notFoundError();
-  }
-  if (room.capacity === room.Booking.length) {
     throw forbiddenError();
   }
 };

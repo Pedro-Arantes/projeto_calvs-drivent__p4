@@ -37,6 +37,8 @@ export async function postBooking(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.FORBIDDEN);
     } else if (error.name === "NotFoundError") {
       return res.sendStatus(httpStatus.NOT_FOUND);
+    } else {
+      return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
